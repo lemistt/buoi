@@ -7,7 +7,7 @@ import { AppStateProvider } from "./context/AppStateContext.tsx";
 
 function App() {
 	return (
-		<div className="layout">
+		<div className="layout h-full">
 			<header className="header">
 				<h1 className="title">Buoi</h1>
 			</header>
@@ -16,13 +16,12 @@ function App() {
 					<section className="flex justify-center">
 						<Header />
 					</section>
-					<section className="flex justify-evenly gap-8 items-center w-full">
-						<CalendarExtended />
+					<section className="flex justify-evenly gap-8 flex-1 items-center w-full">
+						<div className="flex flex-col flex-1  items-center gap-4">
+							<CalendarExtended />
+							<Statistics />
+						</div>
 						<DataInput />
-					</section>
-					<div className="divider"></div>
-					<section className="flex justify-center">
-						<Statistics />
 					</section>
 				</main>
 			</AppStateProvider>
