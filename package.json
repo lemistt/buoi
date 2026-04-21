@@ -11,7 +11,7 @@
 		"biome-check": "biome check"
 	},
 	"dependencies": {
-		"@tailwindcss/vite": "^4.1.18",
+		"@tailwindcss/vite": "^4.2.4",
 		"react": "^19.2.0",
 		"react-calendar": "^6.0.0",
 		"react-country-region-selector": "^4.0.6",
@@ -24,7 +24,7 @@
 		"@types/node": "^24.10.1",
 		"@types/react": "^19.2.5",
 		"@types/react-dom": "^19.2.3",
-		"@vitejs/plugin-react": "^5.1.1",
+		"@vitejs/plugin-react": "^6.0.1",
 		"daisyui": "^5.5.14",
 		"globals": "^16.5.0",
 		"typescript": "~5.9.3",
