@@ -1,7 +1,8 @@
 import {
 	createContext,
 	type ReactNode,
-	useContext, useEffect,
+	useContext,
+	useEffect,
 	useMemo,
 	useState,
 } from "react";
@@ -20,9 +21,16 @@ interface AppState {
 	setHoursGoal: (v: number) => void;
 	daysLeft: number;
 	setDaysLeft: (d: number) => void;
+	country: string;
+	setCountry: (v: string) => void;
+	county: string;
+	setCounty: (v: string) => void;
+	holidays: Holiday[];
+	loading: boolean;
+	error: string | null;
 }
 
-interface Holiday {
+export interface Holiday {
 	date: string;
 	localName: string;
 	name: string;
@@ -33,6 +41,22 @@ interface Holiday {
 	launchYear?: number | null;
 	types: string[];
 }
+
+interface LocalStorageState {
+	hoursPerMonth: MonthsMap;
+	hoursGoal: number;
+	daysLeft: number;
+	country: string;
+	county: string;
+}
+
+type ApiError = {
+	detail: null | string;
+	instance: null | string;
+	status: null | number;
+	title: null | string;
+	type: null | string;
+};
 
 const months = [
 	"January",
@@ -71,12 +95,6 @@ function countDaysLeft(start: Date, daysLeft: number) {
 
 const AppStateContext = createContext<AppState | undefined>(undefined);
 
-interface LocalStorageState {
-	hoursPerMonth: MonthsMap;
-	hoursGoal: number;
-	daysLeft: number;
-}
-
 export function AppStateProvider({ children }: { children: ReactNode }) {
 	const saved: LocalStorageState = useMemo(() => {
 		try {
@@ -86,13 +104,12 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
 			return null;
 		}
 	}, []);
-	const [hoursPerMonth, setHoursPerMonth] =
-		useState<MonthsMap>(() => {
-			if (saved?.hoursPerMonth && typeof saved.hoursPerMonth === "object") {
-				return { ...initialHoursPerMonth, ...saved.hoursPerMonth };
-			}
-			return initialHoursPerMonth;
-		});
+	const [hoursPerMonth, setHoursPerMonth] = useState<MonthsMap>(() => {
+		if (saved?.hoursPerMonth && typeof saved.hoursPerMonth === "object") {
+			return { ...initialHoursPerMonth, ...saved.hoursPerMonth } as MonthsMap;
+		}
+		return initialHoursPerMonth;
+	});
 	const [hoursGoal, setHoursGoal] = useState<number>(() => {
 		if (typeof saved?.hoursGoal === "number") return saved.hoursGoal;
 		return 0;
@@ -102,6 +119,25 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
 		if (typeof saved?.daysLeft === "number") return saved.daysLeft;
 		return 0;
 	});
+
+	const [country, setCountry] = useState(() => saved?.country || "");
+	const [county, setCounty] = useState(() => saved?.county || "");
+
+	const [apiData, setApiData] = useState<Holiday[]>(null);
+	const [loading, setLoading] = useState(false);
+	const [error, setError] = useState<string | null>(null);
+
+	const holidays = useMemo<Holiday[]>(() => {
+		if (!county || !apiData) return [];
+		return apiData.filter((h) => {
+			if (!h.counties || h.counties.length === 0) return true;
+			return h.counties
+				.map((county) => {
+					return county.substring(3, 5).toLowerCase();
+				})
+				.includes(county.toLowerCase());
+		});
+	}, [apiData, county]);
 
 	const today = useMemo(() => new Date(), []);
 
@@ -122,9 +158,33 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
 			hoursPerMonth,
 			hoursGoal,
 			daysLeft,
+			country,
+			county,
 		};
 		localStorage.setItem("appState", JSON.stringify(state));
-	}, [hoursPerMonth, hoursGoal, daysLeft]);
+	}, [hoursPerMonth, hoursGoal, daysLeft, country, county]);
+
+	useEffect(() => {
+		if (!country || country.length !== 2) return; // Skip if dependencies are not set
+		const fetchData = async () => {
+			setLoading(true);
+			setError(null);
+			try {
+				const response = await fetch(
+					`https://date.nager.at/api/v3/publicholidays/${today.getFullYear()}/${country}`,
+				);
+				if (!response.ok) throw new Error("API request failed");
+				const data = await response.json();
+				setApiData(data);
+			} catch (err: any) {
+				setError(err.detail);
+			} finally {
+				setLoading(false);
+			}
+		};
+
+		fetchData();
+	}, [country, today.getFullYear]);
 
 	return (
 		<AppStateContext.Provider
@@ -138,6 +198,13 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
 				setHoursGoal,
 				daysLeft,
 				setDaysLeft,
+				country,
+				setCountry,
+				county,
+				setCounty,
+				holidays,
+				loading,
+				error,
 			}}
 		>
 			{children}

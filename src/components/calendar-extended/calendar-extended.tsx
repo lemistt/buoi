@@ -4,13 +4,13 @@ import { useEffect, useState } from "react";
 import Calendar from "react-calendar";
 import { isWeekend } from "react-calendar/src/shared/dates.ts";
 import type { Value } from "react-calendar/src/shared/types.ts";
-import { useAppState } from "../../context/AppStateContext.tsx";
+import { type Holiday, useAppState } from "../../context/AppStateContext.tsx";
 
 function CalendarExtended() {
-	const { setDaysLeft } = useAppState();
+	const { setDaysLeft, holidays } = useAppState();
 	const [date, setDate] = useState(new Date());
 	const [excludedDates, setExcludedDates] = useState(() =>
-		getDefaultExcludedDates(new Date().getFullYear()),
+		getDefaultExcludedDates(new Date().getFullYear(), holidays),
 	);
 
 	const today = new Date();
@@ -21,6 +21,12 @@ function CalendarExtended() {
 	useEffect(() => {
 		setDaysLeft(countDaysLeft(today, excludedDates));
 	}, [today, excludedDates, setDaysLeft]);
+
+	useEffect(() => {
+		setExcludedDates(
+			getDefaultExcludedDates(new Date().getFullYear(), holidays),
+		);
+	}, [holidays]);
 
 	const toggleDate = (clickedDate: Date) => {
 		const key = toKey(clickedDate);
@@ -36,8 +42,13 @@ function CalendarExtended() {
 		});
 	};
 
+	const resetDays = () => {
+		setExcludedDates(getDefaultExcludedDates(new Date().getFullYear(), holidays));
+	}
+
 	return (
 		<div>
+			<button className="btn" onClick={resetDays}>Reset Days</button>
 			<Calendar
 				value={date}
 				maxDate={endOfYear}
@@ -61,7 +72,12 @@ function CalendarExtended() {
 	);
 }
 
-const toKey = (date: Date) => date.toISOString().split("T")[0];
+const toKey = (date: Date) => {
+	const year = date.getFullYear();
+	const month = String(date.getMonth() + 1).padStart(2, "0");
+	const day = String(date.getDate()).padStart(2, "0");
+	return `${year}-${month}-${day}`;
+};
 
 function countDaysLeft(
 	startDate: string | number | Date,
@@ -87,17 +103,22 @@ function countDaysLeft(
 	return count;
 }
 
-function getDefaultExcludedDates(year: number) {
+function getDefaultExcludedDates(year: number, holidays: Holiday[]) {
 	const excluded = new Set();
 	const date = new Date(year, 0, 1);
 
 	while (date.getFullYear() === year) {
-		if (isWeekend(date)) {
+		if (isWeekend(date) || isHoliday(date, holidays)) {
 			excluded.add(toKey(date));
 		}
 		date.setDate(date.getDate() + 1);
 	}
 	return excluded;
+}
+
+function isHoliday(date: Date, holidays: Holiday[]) {
+	const dateKey = toKey(date);
+	return holidays.some((h) => h.date === dateKey);
 }
 
 export default CalendarExtended;
