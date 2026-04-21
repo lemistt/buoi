@@ -1,5 +1,5 @@
 import { useAppState } from "../../context/AppStateContext.tsx";
-import {months} from "../../util/date-util.ts";
+import { months } from "../../util/date-util.ts";
 
 export default function DataInput() {
 	const { hoursPerMonth, setHoursPerMonth } = useAppState();

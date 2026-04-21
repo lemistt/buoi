@@ -4,7 +4,7 @@ import { useState } from "react";
 import Calendar from "react-calendar";
 import type { Value } from "react-calendar/src/shared/types.ts";
 import { useAppState } from "../../context/AppStateContext.tsx";
-import {getDefaultExcludedDates, toKey} from "../../util/date-util.ts";
+import { getDefaultExcludedDates, toKey } from "../../util/date-util.ts";
 
 function CalendarExtended() {
 	const { holidays, excludedDates, setExcludedDates } = useAppState();
@@ -30,12 +30,16 @@ function CalendarExtended() {
 	};
 
 	const resetDays = () => {
-		setExcludedDates(getDefaultExcludedDates(new Date().getFullYear(), holidays));
-	}
+		setExcludedDates(
+			getDefaultExcludedDates(new Date().getFullYear(), holidays),
+		);
+	};
 
 	return (
 		<div>
-			<button className="btn" onClick={resetDays}>Reset Days</button>
+			<button type="button" className="btn" onClick={resetDays}>
+				Reset Days
+			</button>
 			<Calendar
 				value={date}
 				maxDate={endOfYear}
@@ -58,8 +62,5 @@ function CalendarExtended() {
 		</div>
 	);
 }
-
-
-
 
 export default CalendarExtended;

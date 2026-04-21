@@ -6,8 +6,13 @@ import {
 	useMemo,
 	useState,
 } from "react";
-import {countDaysLeft, getDefaultExcludedDates, months} from "../util/date-util.ts";
-import type {Holiday} from "../models/Holiday.ts";
+import {
+	countDaysLeft,
+	getDefaultExcludedDates,
+	months,
+} from "../util/date-util.ts";
+import type { Holiday } from "../models/Holiday.ts";
+import type { ApiError } from "../models/ApiError.ts";
 
 type MonthsMap = Record<string, number>;
 
@@ -28,7 +33,9 @@ interface AppState {
 	setCounty: (v: string) => void;
 	holidays: Holiday[];
 	excludedDates: Set<string>;
-	setExcludedDates: (v: Set<string> | ((prev: Set<string>) => Set<string>)) => void;
+	setExcludedDates: (
+		v: Set<string> | ((prev: Set<string>) => Set<string>),
+	) => void;
 	loading: boolean;
 	error: string | null;
 }
@@ -69,7 +76,6 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
 		return 0;
 	});
 
-
 	const [country, setCountry] = useState(() => saved?.country || "");
 	const [county, setCounty] = useState(() => saved?.county || "");
 
@@ -102,12 +108,13 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
 		const total = Object.values(hoursPerMonth).reduce((s, v) => s + v, 0);
 		const remaining = Math.max(0, hoursGoal - total);
 		const daysLeft = countDaysLeft(today, excludedDates);
-		const perDay = daysLeft > 0 ? remaining / daysLeft : remaining > 0 ? Infinity : 0;
+		const perDay =
+			daysLeft > 0 ? remaining / daysLeft : remaining > 0 ? Infinity : 0;
 		return {
 			totalHours: total,
 			remainingHours: remaining,
 			perDayTarget: perDay,
-			daysLeft: daysLeft
+			daysLeft: daysLeft,
 		};
 	}, [hoursPerMonth, hoursGoal, excludedDates, today]);
 
@@ -142,11 +149,15 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
 				const response = await fetch(
 					`https://date.nager.at/api/v3/publicholidays/${today.getFullYear()}/${country}`,
 				);
-				if (!response.ok) throw new Error("API request failed");
+				if (!response.ok) {
+					setError("API request failed");
+					return;
+				}
 				const data = await response.json();
 				setApiData(data);
-			} catch (err: any) {
-				setError(err.detail);
+			} catch (err) {
+				const error = err as ApiError;
+				setError(error.detail);
 			} finally {
 				setLoading(false);
 			}
@@ -187,4 +198,3 @@ export function useAppState() {
 	if (!ctx) throw new Error("useAppState must be used within AppStateProvider");
 	return ctx;
 }
-

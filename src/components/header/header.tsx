@@ -1,5 +1,5 @@
 import { useAppState } from "../../context/AppStateContext.tsx";
-import {CountryDropdown, RegionDropdown} from "react-country-region-selector";
+import { CountryDropdown, RegionDropdown } from "react-country-region-selector";
 
 export default function Header() {
 	const {
@@ -28,7 +28,12 @@ export default function Header() {
 					</label>
 				</div>
 				<div className="flex gap-4">
-					<CountryDropdown className="select w-3xs" value={country} valueType="short" onChange={setCountry} />
+					<CountryDropdown
+						className="select w-3xs"
+						value={country}
+						valueType="short"
+						onChange={setCountry}
+					/>
 					<RegionDropdown
 						className="select w-3xs"
 						country={country}
@@ -44,9 +49,9 @@ export default function Header() {
 				<div className="flex gap-4">
 					<progress value={totalHours} max={hoursGoal} />
 					<span>
-							{totalHours} / {hoursGoal} (
+						{totalHours} / {hoursGoal} (
 						{(hoursGoal ? (totalHours / hoursGoal) * 100 : 0).toFixed(2)} %)
-						</span>
+					</span>
 				</div>
 			</div>
 		</div>
