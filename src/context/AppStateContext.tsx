@@ -6,13 +6,13 @@ import {
 	useMemo,
 	useState,
 } from "react";
+import type { ApiError } from "../models/ApiError.ts";
+import type { Holiday } from "../models/Holiday.ts";
 import {
 	countDaysLeft,
 	getDefaultExcludedDates,
 	months,
 } from "../util/date-util.ts";
-import type { Holiday } from "../models/Holiday.ts";
-import type { ApiError } from "../models/ApiError.ts";
 
 type MonthsMap = Record<string, number>;
 

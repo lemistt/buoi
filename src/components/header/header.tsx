@@ -1,5 +1,5 @@
-import { useAppState } from "../../context/AppStateContext.tsx";
 import { CountryDropdown, RegionDropdown } from "react-country-region-selector";
+import { useAppState } from "../../context/AppStateContext.tsx";
 
 export default function Header() {
 	const {
