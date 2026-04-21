@@ -73,7 +73,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
 	const [country, setCountry] = useState(() => saved?.country || "");
 	const [county, setCounty] = useState(() => saved?.county || "");
 
-	const [apiData, setApiData] = useState<Holiday[]>(null);
+	const [apiData, setApiData] = useState<Holiday[]>([]);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 

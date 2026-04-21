@@ -1,13 +1,13 @@
 import "react-calendar/dist/Calendar.css";
 import "./calendar-extended.css";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Calendar from "react-calendar";
 import type { Value } from "react-calendar/src/shared/types.ts";
 import { useAppState } from "../../context/AppStateContext.tsx";
-import {countDaysLeft, getDefaultExcludedDates, toKey} from "../../util/date-util.ts";
+import {getDefaultExcludedDates, toKey} from "../../util/date-util.ts";
 
 function CalendarExtended() {
-	const { setDaysLeft, holidays, excludedDates, setExcludedDates } = useAppState();
+	const { holidays, excludedDates, setExcludedDates } = useAppState();
 	const [date, setDate] = useState(new Date());
 
 	const today = new Date();

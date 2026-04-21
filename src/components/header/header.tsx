@@ -1,4 +1,5 @@
 import { useAppState } from "../../context/AppStateContext.tsx";
+import {CountryDropdown, RegionDropdown} from "react-country-region-selector";
 
 export default function Header() {
 	const {
@@ -26,38 +27,27 @@ export default function Header() {
 						/>
 					</label>
 				</div>
-				<div className="progress-bar flex gap-4">
-					<span>Progress: </span>
-					<div className="flex gap-4">
-						<progress value={totalHours} max={hoursGoal} />
-						<span>
-							{totalHours} / {hoursGoal} (
-							{(hoursGoal ? (totalHours / hoursGoal) * 100 : 0).toFixed(2)} %)
-						</span>
-					</div>
+				<div className="flex gap-4">
+					<CountryDropdown className="select w-3xs" value={country} valueType="short" onChange={setCountry} />
+					<RegionDropdown
+						className="select w-3xs"
+						country={country}
+						countryValueType="short"
+						valueType="short"
+						value={county}
+						onChange={(val) => setCounty(val)}
+					/>
 				</div>
 			</div>
-			<div className="flex items-center gap-4">
-				<label className={"input"}>
-					<span className={"label"}>Country</span>
-					<input
-						type="text"
-						value={country}
-						minLength={2}
-						maxLength={2}
-						onChange={(e) => setCountry(e.target.value)}
-					/>
-				</label>
-				<label className={"input"}>
-					<span className={"label"}>County</span>
-					<input
-						type="text"
-						value={county}
-						minLength={2}
-						maxLength={2}
-						onChange={(e) => setCounty(e.target.value)}
-					/>
-				</label>
+			<div className="progress-bar flex items-center gap-4">
+				<span>Progress: </span>
+				<div className="flex gap-4">
+					<progress value={totalHours} max={hoursGoal} />
+					<span>
+							{totalHours} / {hoursGoal} (
+						{(hoursGoal ? (totalHours / hoursGoal) * 100 : 0).toFixed(2)} %)
+						</span>
+				</div>
 			</div>
 		</div>
 	);
