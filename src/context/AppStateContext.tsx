@@ -22,7 +22,6 @@ interface AppState {
 	hoursGoal: number;
 	setHoursGoal: (v: number) => void;
 	daysLeft: number;
-	setDaysLeft: (d: number) => void;
 	country: string;
 	setCountry: (v: string) => void;
 	county: string;
@@ -70,11 +69,6 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
 		return 0;
 	});
 
-	// useMemo
-	const [daysLeft, setDaysLeft] = useState<number>(() => {
-		if (typeof saved?.daysLeft === "number") return saved.daysLeft;
-		return 0;
-	});
 
 	const [country, setCountry] = useState(() => saved?.country || "");
 	const [county, setCounty] = useState(() => saved?.county || "");
@@ -104,15 +98,16 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
 
 	const today = useMemo(() => new Date(), []);
 
-	const { totalHours, remainingHours, perDayTarget } = useMemo(() => {
+	const { totalHours, remainingHours, perDayTarget, daysLeft } = useMemo(() => {
 		const total = Object.values(hoursPerMonth).reduce((s, v) => s + v, 0);
 		const remaining = Math.max(0, hoursGoal - total);
-		const days = countDaysLeft(today, excludedDates);
-		const perDay = days > 0 ? remaining / days : remaining > 0 ? Infinity : 0;
+		const daysLeft = countDaysLeft(today, excludedDates);
+		const perDay = daysLeft > 0 ? remaining / daysLeft : remaining > 0 ? Infinity : 0;
 		return {
 			totalHours: total,
 			remainingHours: remaining,
 			perDayTarget: perDay,
+			daysLeft: daysLeft
 		};
 	}, [hoursPerMonth, hoursGoal, excludedDates, today]);
 
@@ -139,7 +134,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
 	}, [holidays]);
 
 	useEffect(() => {
-		if (!country || country.length !== 2) return; // Skip if dependencies are not set
+		if (!country || country.length !== 2) return;
 		const fetchData = async () => {
 			setLoading(true);
 			setError(null);
@@ -171,7 +166,6 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
 				hoursGoal,
 				setHoursGoal,
 				daysLeft,
-				setDaysLeft,
 				country,
 				setCountry,
 				county,

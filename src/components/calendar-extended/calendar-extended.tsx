@@ -15,10 +15,6 @@ function CalendarExtended() {
 
 	const endOfYear = new Date(today.getFullYear(), 11, 31);
 
-	useEffect(() => {
-		setDaysLeft(countDaysLeft(today, excludedDates));
-	}, [today, excludedDates, setDaysLeft]);
-
 	const toggleDate = (clickedDate: Date) => {
 		const key = toKey(clickedDate);
 
