@@ -1,21 +1,5 @@
 import { useAppState } from "../../context/AppStateContext.tsx";
-
-const months = [
-	"January",
-	"February",
-	"March",
-	"April",
-	"May",
-	"June",
-	"July",
-	"August",
-	"September",
-	"October",
-	"November",
-	"December",
-];
-
-// TODO: Get country and county for holidays
+import {months} from "../../util/date-util.ts";
 
 export default function DataInput() {
 	const { hoursPerMonth, setHoursPerMonth } = useAppState();
@@ -29,7 +13,7 @@ export default function DataInput() {
 		<div className="flex flex-col flex-1 gap-4 h-100 overflow-auto">
 			{months.map((month) => (
 				<div
-					key="month"
+					key={month}
 					className="collapse bg-base-100 border-base-300 border shrink-0"
 				>
 					<input type="checkbox" />

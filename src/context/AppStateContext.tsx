@@ -6,6 +6,8 @@ import {
 	useMemo,
 	useState,
 } from "react";
+import {countDaysLeft, getDefaultExcludedDates, months} from "../util/date-util.ts";
+import type {Holiday} from "../models/Holiday.ts";
 
 type MonthsMap = Record<string, number>;
 
@@ -26,20 +28,10 @@ interface AppState {
 	county: string;
 	setCounty: (v: string) => void;
 	holidays: Holiday[];
+	excludedDates: Set<string>;
+	setExcludedDates: (v: Set<string> | ((prev: Set<string>) => Set<string>)) => void;
 	loading: boolean;
 	error: string | null;
-}
-
-export interface Holiday {
-	date: string;
-	localName: string;
-	name: string;
-	countryCode: string;
-	fixed: boolean;
-	global: boolean;
-	counties?: string[] | null;
-	launchYear?: number | null;
-	types: string[];
 }
 
 interface LocalStorageState {
@@ -48,50 +40,13 @@ interface LocalStorageState {
 	daysLeft: number;
 	country: string;
 	county: string;
+	excludedDates: string[];
 }
-
-type ApiError = {
-	detail: null | string;
-	instance: null | string;
-	status: null | number;
-	title: null | string;
-	type: null | string;
-};
-
-const months = [
-	"January",
-	"February",
-	"March",
-	"April",
-	"May",
-	"June",
-	"July",
-	"August",
-	"September",
-	"October",
-	"November",
-	"December",
-];
 
 const initialHoursPerMonth: MonthsMap = months.reduce((acc, m) => {
 	acc[m] = 0;
 	return acc;
 }, {} as MonthsMap);
-
-function countDaysLeft(start: Date, daysLeft: number) {
-	let count = 0;
-	const current = new Date(start);
-
-	while (count < daysLeft) {
-		current.setDate(current.getDate() + 1);
-		const day = current.getDay();
-		if (day !== 0 && day !== 6) {
-			count++;
-		}
-	}
-
-	return count;
-}
 
 const AppStateContext = createContext<AppState | undefined>(undefined);
 
@@ -115,6 +70,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
 		return 0;
 	});
 
+	// useMemo
 	const [daysLeft, setDaysLeft] = useState<number>(() => {
 		if (typeof saved?.daysLeft === "number") return saved.daysLeft;
 		return 0;
@@ -139,19 +95,26 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
 		});
 	}, [apiData, county]);
 
+	const [excludedDates, setExcludedDates] = useState<Set<string>>(() => {
+		if (saved?.excludedDates && Array.isArray(saved.excludedDates)) {
+			return new Set(saved.excludedDates);
+		}
+		return getDefaultExcludedDates(new Date().getFullYear(), []);
+	});
+
 	const today = useMemo(() => new Date(), []);
 
 	const { totalHours, remainingHours, perDayTarget } = useMemo(() => {
 		const total = Object.values(hoursPerMonth).reduce((s, v) => s + v, 0);
 		const remaining = Math.max(0, hoursGoal - total);
-		const days = countDaysLeft(today, daysLeft);
+		const days = countDaysLeft(today, excludedDates);
 		const perDay = days > 0 ? remaining / days : remaining > 0 ? Infinity : 0;
 		return {
 			totalHours: total,
 			remainingHours: remaining,
 			perDayTarget: perDay,
 		};
-	}, [hoursPerMonth, hoursGoal, daysLeft, today]);
+	}, [hoursPerMonth, hoursGoal, excludedDates, today]);
 
 	useEffect(() => {
 		const state: LocalStorageState = {
@@ -160,9 +123,20 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
 			daysLeft,
 			country,
 			county,
+			excludedDates: Array.from(excludedDates),
 		};
 		localStorage.setItem("appState", JSON.stringify(state));
-	}, [hoursPerMonth, hoursGoal, daysLeft, country, county]);
+	}, [hoursPerMonth, hoursGoal, daysLeft, country, county, excludedDates]);
+
+	useEffect(() => {
+		setExcludedDates((prev) => {
+			const newSet = new Set(prev);
+			for (const holiday of holidays) {
+				newSet.add(holiday.date);
+			}
+			return newSet;
+		});
+	}, [holidays]);
 
 	useEffect(() => {
 		if (!country || country.length !== 2) return; // Skip if dependencies are not set
@@ -183,7 +157,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
 			}
 		};
 
-		fetchData();
+		fetchData().then();
 	}, [country, today.getFullYear]);
 
 	return (
@@ -203,6 +177,8 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
 				county,
 				setCounty,
 				holidays,
+				excludedDates,
+				setExcludedDates,
 				loading,
 				error,
 			}}
@@ -217,3 +193,4 @@ export function useAppState() {
 	if (!ctx) throw new Error("useAppState must be used within AppStateProvider");
 	return ctx;
 }
+
