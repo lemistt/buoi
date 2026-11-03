@@ -4,11 +4,15 @@ import CalendarExtended from "./components/calendar-extended/calendar-extended.t
 import DataInput from "./components/data-input/data-input.tsx";
 import Header from "./components/header/header.tsx";
 import Statistics from "./components/statistics/statistics.tsx";
+import TargetNote from "./components/target-note/target-note.tsx";
 import { AppStateProvider } from "./context/AppStateContext.tsx";
 import { months } from "./util/date-util.ts";
 
 function App() {
-	const [firstMonth, setFirstMonth] = useState(0);
+	const [firstMonth, setFirstMonth] = useState(() => {
+		const currentMonth = new Date().getMonth();
+		return currentMonth === months.length - 1 ? currentMonth - 1 : currentMonth;
+	});
 
 	return (
 		<div className="layout h-full">
@@ -17,20 +21,33 @@ function App() {
 			</header>
 			<AppStateProvider>
 				<main className="body">
-					<section className="settings">
-						<Header />
-					</section>
 					<section className="desk" aria-label="Monthly planner">
-						<button
-							type="button"
-							className="page-arrow"
-							aria-label="Show previous months"
-							onClick={() => setFirstMonth((month) => Math.max(0, month - 2))}
-							disabled={firstMonth === 0}
-						>
-							<span aria-hidden="true">‹</span>
-						</button>
+						<div className="target-note-slot">
+							<TargetNote />
+						</div>
 						<div className="notebook">
+							<button
+								type="button"
+								className="page-fold previous-page"
+								aria-label="Show previous months"
+								onClick={() => setFirstMonth((month) => Math.max(0, month - 2))}
+								disabled={firstMonth === 0}
+							>
+								<span aria-hidden="true">‹</span>
+							</button>
+							<button
+								type="button"
+								className="page-fold next-page"
+								aria-label="Show next months"
+								onClick={() =>
+									setFirstMonth((month) =>
+										Math.min(months.length - 2, month + 2),
+									)
+								}
+								disabled={firstMonth >= months.length - 2}
+							>
+								<span aria-hidden="true">›</span>
+							</button>
 							<div className="notebook-pages">
 								{months.slice(firstMonth, firstMonth + 2).map((month) => (
 									<article className="notebook-page" key={month}>
@@ -41,20 +58,15 @@ function App() {
 								))}
 							</div>
 						</div>
-						<button
-							type="button"
-							className="page-arrow"
-							aria-label="Show next months"
-							onClick={() =>
-								setFirstMonth((month) => Math.min(months.length - 2, month + 2))
-							}
-							disabled={firstMonth >= months.length - 2}
-						>
-							<span aria-hidden="true">›</span>
-						</button>
-						<div className="notebook-summary">
+						<aside className="statistics-device" aria-label="Year statistics">
 							<Statistics />
-						</div>
+						</aside>
+						<aside
+							className="desk-sidebar"
+							aria-label="Location and goal settings"
+						>
+							<Header />
+						</aside>
 					</section>
 				</main>
 			</AppStateProvider>
