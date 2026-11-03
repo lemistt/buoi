@@ -1,3 +1,4 @@
+import type { ComponentProps, ComponentType } from "react";
 import { useEffect, useState } from "react";
 import {
 	CountrySelect,
@@ -8,6 +9,25 @@ import {
 import type { Country, State } from "react-country-state-city/dist/esm/types";
 import { CircleMarker, MapContainer, TileLayer, Tooltip } from "react-leaflet";
 import { useAppState } from "../../context/AppStateContext.tsx";
+
+type CountrySelectProps = Omit<
+	ComponentProps<typeof CountrySelect>,
+	"defaultValue" | "onChange"
+> & {
+	defaultValue?: Country;
+	onChange?: (country: Country) => void;
+};
+
+type StateSelectProps = Omit<
+	ComponentProps<typeof StateSelect>,
+	"defaultValue" | "onChange"
+> & {
+	defaultValue?: State;
+	onChange?: (state: State) => void;
+};
+
+const TypedCountrySelect = CountrySelect as ComponentType<CountrySelectProps>;
+const TypedStateSelect = StateSelect as ComponentType<StateSelectProps>;
 
 function getCoordinates(
 	location: Country | State | undefined,
@@ -215,13 +235,12 @@ export default function Header() {
 					<div className="location-fields">
 						<span className="location-field">
 							<span>Country</span>
-							<CountrySelect
+							<TypedCountrySelect
 								containerClassName="form-group"
 								inputClassName="w-full border-0 bg-transparent p-0 shadow-none outline-none"
-								defaultValue={selectedCountry as any}
+								defaultValue={selectedCountry}
 								aria-label="Country"
-								onChange={(value: any) => {
-									const countryValue = value as Country;
+								onChange={(countryValue) => {
 									setSelectedCountry(countryValue);
 									if (
 										countryValue.iso2.toLowerCase() !== country.toLowerCase()
@@ -236,16 +255,15 @@ export default function Header() {
 						</span>
 						<span className="location-field">
 							<span>State or province</span>
-							<StateSelect
+							<TypedStateSelect
 								key={selectedCountry?.id ?? "no-country"}
 								countryid={selectedCountry?.id ?? 0}
 								containerClassName="form-group"
 								inputClassName="w-full border-0 bg-transparent p-0 shadow-none outline-none"
-								defaultValue={selectedState as any}
+								defaultValue={selectedState}
 								aria-label="State or province"
 								disabled={!selectedCountry}
-								onChange={(value: any) => {
-									const stateValue = value as State;
+								onChange={(stateValue) => {
 									setSelectedState(stateValue);
 									setCounty(stateValue.state_code);
 								}}

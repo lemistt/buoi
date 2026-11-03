@@ -37,12 +37,12 @@
 	box-sizing: border-box;
 	height: 100%;
 	min-width: 0;
-	border: 0 !important;
-	padding: 0 !important;
+	border: 0;
+	padding: 0;
 	background: transparent;
 	color: inherit;
 	font: inherit;
-	box-shadow: none !important;
+	box-shadow: none;
 	outline: none;
 }
 
@@ -211,6 +211,11 @@ body {
 	clip-path: polygon(0 0, 100% 0, 100% 100%);
 }
 
+.page-fold span {
+	font-size: 1.65rem;
+	line-height: 1;
+}
+
 .page-fold.previous-page span {
 	justify-self: start;
 	align-self: start;
@@ -223,9 +228,9 @@ body {
 	padding: 0.1rem 0.45rem 0 0;
 }
 
-.page-fold span {
-	font-size: 1.65rem;
-	line-height: 1;
+.page-fold:focus-visible {
+	outline: 2px solid var(--color-forest);
+	outline-offset: 2px;
 }
 
 .page-fold:not(:disabled):hover,
@@ -233,22 +238,9 @@ body {
 	filter: brightness(1.08) drop-shadow(0 3px 3px rgb(52 65 58 / 25%));
 }
 
-.page-fold:focus-visible {
-	outline: 2px solid var(--color-forest);
-	outline-offset: 2px;
-}
-
 .page-fold:disabled {
 	color: #909486;
 	cursor: not-allowed;
-}
-
-.notebook-page:first-child {
-	border-radius: var(--radius-page-left) 0 0 var(--radius-page-left);
-}
-
-.notebook-page:last-child {
-	border-radius: 0 var(--radius-page-right) var(--radius-page-right) 0;
 }
 
 .desk-sidebar {
@@ -513,6 +505,14 @@ body {
 		var(--color-paper);
 	box-shadow: var(--shadow-page);
 	text-align: left;
+}
+
+.notebook-page:first-child {
+	border-radius: var(--radius-page-left) 0 0 var(--radius-page-left);
+}
+
+.notebook-page:last-child {
+	border-radius: 0 var(--radius-page-right) var(--radius-page-right) 0;
 }
 
 .notebook-page h2 {
