@@ -3,6 +3,12 @@ import {
 	useState,
 } from "react";
 import {
+	CircleMarker,
+	MapContainer,
+	TileLayer,
+	Tooltip,
+} from "react-leaflet";
+import {
 	CountrySelect,
 	GetCountries,
 	GetState,
@@ -10,6 +16,31 @@ import {
 } from "react-country-state-city";
 import type { Country, State } from "react-country-state-city/dist/esm/types";
 import { useAppState } from "../../context/AppStateContext.tsx";
+
+function getCoordinates(
+	location: Country | State | undefined,
+): [number, number] | undefined {
+	if (!location?.latitude?.trim() || !location.longitude?.trim()) return;
+
+	const coordinates: [number, number] = [
+		Number(location.latitude),
+		Number(location.longitude),
+	];
+	return coordinates.every(Number.isFinite) ? coordinates : undefined;
+}
+
+function getGeocodedCoordinates(value: unknown): [number, number] | undefined {
+	if (!Array.isArray(value) || typeof value[0] !== "object" || !value[0]) {
+		return;
+	}
+
+	const result = value[0];
+	if (!("lat" in result) || !("lon" in result)) return;
+	if (typeof result.lat !== "string" || typeof result.lon !== "string") return;
+
+	const coordinates: [number, number] = [Number(result.lat), Number(result.lon)];
+	return coordinates.every(Number.isFinite) ? coordinates : undefined;
+}
 
 export default function Header() {
 	const {
@@ -23,6 +54,71 @@ export default function Header() {
 	} = useAppState();
 	const [selectedCountry, setSelectedCountry] = useState<Country>();
 	const [selectedState, setSelectedState] = useState<State>();
+	const stateCenter = getCoordinates(selectedState);
+	const countryCenter = getCoordinates(selectedCountry);
+	const stateKey =
+		selectedCountry && selectedState
+			? `${selectedCountry.iso2}-${selectedState.state_code}`
+			: "";
+	const [geocodedState, setGeocodedState] = useState<{
+		key: string;
+		center: [number, number];
+	}>();
+	const [stateLookupStatus, setStateLookupStatus] = useState<
+		"loading" | "unavailable" | undefined
+	>();
+	const geocodedCenter =
+		geocodedState?.key === stateKey ? geocodedState.center : undefined;
+	const mapCenter = stateCenter ?? geocodedCenter ?? countryCenter;
+	const mapLocation =
+		stateCenter || geocodedCenter ? selectedState : selectedCountry;
+	const mapKey = `${selectedCountry?.iso2}-${selectedState?.state_code ?? ""}-${mapCenter?.join(",")}`;
+	const showingCountryCenterForState = Boolean(
+		selectedState && !stateCenter && !geocodedCenter,
+	);
+
+	useEffect(() => {
+		if (!selectedCountry || !selectedState || stateCenter) {
+			setStateLookupStatus(undefined);
+			return;
+		}
+
+		const controller = new AbortController();
+		const query = new URLSearchParams({
+			q: `${selectedState.name}, ${selectedCountry.name}`,
+			format: "jsonv2",
+			limit: "1",
+			featuretype: "state",
+		});
+		setStateLookupStatus("loading");
+
+		fetch(`https://nominatim.openstreetmap.org/search?${query}`, {
+			headers: { Accept: "application/json" },
+			signal: controller.signal,
+		})
+			.then((response) => {
+				if (!response.ok) {
+					throw new Error(`State lookup failed with status ${response.status}`);
+				}
+				return response.json() as Promise<unknown>;
+			})
+			.then((result) => {
+				const center = getGeocodedCoordinates(result);
+				if (center) {
+					setGeocodedState({ key: stateKey, center });
+					setStateLookupStatus(undefined);
+				} else {
+					setStateLookupStatus("unavailable");
+				}
+			})
+			.catch((error: unknown) => {
+				if (controller.signal.aborted) return;
+				console.error("Unable to find coordinates for the selected state.", error);
+				setStateLookupStatus("unavailable");
+			});
+
+		return () => controller.abort();
+	}, [selectedCountry?.name, selectedState?.name, stateCenter, stateKey]);
 
 	useEffect(() => {
 		if (
@@ -143,6 +239,43 @@ export default function Header() {
 					</span>
 				</div>
 			</div>
+			{selectedCountry && (
+				<section className="selection-map" aria-label="Selected location map">
+					<h2>
+						{selectedState
+							? `${selectedState.name}, ${selectedCountry.name}`
+							: selectedCountry.name}
+					</h2>
+					{mapCenter && mapLocation ? (
+						<MapContainer
+							key={mapKey}
+							center={mapCenter}
+							zoom={stateCenter || geocodedCenter ? 10 : 4}
+							scrollWheelZoom={false}
+							aria-label={`Map showing ${mapLocation.name}`}
+						>
+							<TileLayer
+								attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+								url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+							/>
+							<CircleMarker center={mapCenter} radius={8}>
+								<Tooltip permanent>{mapLocation.name}</Tooltip>
+							</CircleMarker>
+						</MapContainer>
+					) : (
+						<p>Map coordinates are unavailable for this selection.</p>
+					)}
+					{stateLookupStatus === "loading" && (
+						<p>Locating the selected state...</p>
+					)}
+					{showingCountryCenterForState &&
+						stateLookupStatus === "unavailable" && (
+							<p>
+								Unable to locate the selected state; showing the country center.
+							</p>
+						)}
+				</section>
+			)}
 		</div>
 	);
 }
