@@ -1,0 +1,31 @@
+:root {
+	--color-forest: #385b50;
+	--color-forest-muted: #52665c;
+	--color-forest-soft: #3e5148;
+	--color-desk: #d7c6a1;
+	--color-desk-edge: #d5c9ab;
+	--color-notebook-inset: #f4ecd8;
+	--color-paper: #fffdf7;
+	--color-paper-input: #fffefb;
+	--color-paper-dot: #c9d8ce;
+	--color-paper-dot-size: 1px;
+	--color-paper-dot-spacing: 14px;
+	--color-control: #e8efe7;
+	--color-control-hover: #e4eee6;
+	--color-control-pale: #fff8e9;
+	--color-input-border: #bdcfc3;
+	--color-excluded-day: #f3f4f6;
+	--color-excluded-text: #9ca3af;
+
+	--radius-notebook: 1.5rem;
+	--radius-page-left: 0.75rem;
+	--radius-page-right: 1.25rem;
+	--radius-calendar-tile: 0.4rem;
+
+	--shadow-notebook:
+		0 1.25rem 3rem #382c1e1c, inset 0 0 0 5px var(--color-notebook-inset);
+	--shadow-page: 0 0.5rem 1.25rem #382c1e16;
+	--shadow-control: 0 0.25rem 0.75rem #382c1e1c;
+
+	--notebook-page-height: 36rem;
+}

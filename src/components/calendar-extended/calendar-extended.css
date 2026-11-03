@@ -1,5 +1,5 @@
 .excluded-day {
-	background: #f3f4f6;
-	color: #9ca3af;
+	background: var(--color-excluded-day);
+	color: var(--color-excluded-text);
 	text-decoration: line-through;
 }

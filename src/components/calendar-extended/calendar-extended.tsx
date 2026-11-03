@@ -1,14 +1,20 @@
 import "react-calendar/dist/Calendar.css";
 import "./calendar-extended.css";
-import { useState } from "react";
 import Calendar from "react-calendar";
 import type { Value } from "react-calendar/src/shared/types.ts";
 import { useAppState } from "../../context/AppStateContext.tsx";
-import { getDefaultExcludedDates, toKey } from "../../util/date-util.ts";
+import {
+	getDefaultExcludedDates,
+	months,
+	toKey,
+} from "../../util/date-util.ts";
 
-function CalendarExtended() {
+function CalendarExtended({ month }: { month: string }) {
 	const { holidays, excludedDates, setExcludedDates } = useAppState();
-	const [date, setDate] = useState(new Date());
+	const monthIndex = months.indexOf(month);
+	const year = new Date().getFullYear();
+	const monthStart = new Date(year, monthIndex, 1);
+	const monthEnd = new Date(year, monthIndex + 1, 0);
 
 	const today = new Date();
 	today.setHours(0, 0, 0, 0);
@@ -36,16 +42,20 @@ function CalendarExtended() {
 	};
 
 	return (
-		<div>
+		<div className="month-calendar">
 			<button type="button" className="btn" onClick={resetDays}>
 				Reset Days
 			</button>
 			<Calendar
-				value={date}
-				maxDate={endOfYear}
+				defaultActiveStartDate={monthStart}
+				maxDate={monthEnd < endOfYear ? monthEnd : endOfYear}
+				minDate={monthStart}
+				maxDetail="month"
+				minDetail="month"
+				showNavigation={false}
+				showNeighboringMonth={false}
 				onChange={(d: Value) => {
 					if (d instanceof Date) {
-						setDate(d);
 						toggleDate(d);
 					}
 				}}

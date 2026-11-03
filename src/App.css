@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "react-country-state-city/dist/react-country-state-city.css";
+@import "./variables.css";
 @plugin "daisyui" {
 	themes: light --default;
 }
@@ -56,27 +57,26 @@
 }
 
 body {
-	height: 100vh;
+	min-height: 100vh;
 }
 
 #root {
-	max-width: 1280px;
+	max-width: 1440px;
 	margin: 0 auto;
-	padding: 2rem;
+	padding: 1.5rem clamp(1rem, 4vw, 3rem);
 	text-align: center;
-	height: 100%;
+	min-height: 100vh;
 }
 
 .layout {
 	width: 100%;
-	height: 100%;
+	min-height: calc(100vh - 3rem);
 	display: grid;
 	grid:
-		"header header header" auto
-		"leftSide body rightSide" 1fr
-		"footer footer footer" auto
-		/ auto 1fr auto;
-	gap: 8px;
+		"header" auto
+		"body" 1fr
+		"footer" auto;
+	gap: 1rem;
 }
 
 .header {
@@ -89,13 +89,185 @@ body {
 	grid-area: body;
 	display: flex;
 	flex-direction: column;
-	gap: 1rem;
+	gap: 1.5rem;
+	min-width: 0;
+}
+
+.header .title {
+	margin: 0;
+	color: var(--color-forest);
+	font-size: clamp(2rem, 4vw, 3rem);
+	font-weight: 800;
+	letter-spacing: -0.06em;
 }
 .rightSide {
 	grid-area: rightSide;
 }
 .footer {
 	grid-area: footer;
+}
+
+.settings {
+	display: flex;
+	justify-content: center;
+}
+
+.desk {
+	display: grid;
+	grid-template-columns: auto minmax(0, 1fr) auto;
+	grid-template-rows: 1fr auto;
+	align-items: center;
+	gap: 0.75rem;
+	width: 100%;
+	max-width: 1120px;
+	margin: 0 auto;
+	padding: clamp(0.75rem, 2vw, 1.5rem);
+	border: 1px solid var(--color-desk-edge);
+	border-radius: var(--radius-notebook);
+	background: var(--color-desk);
+	box-shadow: var(--shadow-notebook);
+}
+
+.notebook {
+	grid-column: 2;
+	width: 100%;
+	min-width: 0;
+}
+
+.notebook-pages {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	width: 100%;
+	min-width: 0;
+}
+
+.notebook-page {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	gap: 1rem;
+	min-width: 0;
+	height: var(--notebook-page-height);
+	padding: clamp(1rem, 2vw, 1.5rem);
+	background:
+		radial-gradient(
+			circle,
+			var(--color-paper-dot) var(--color-paper-dot-size),
+			transparent calc(var(--color-paper-dot-size) + 0.2px)
+		)
+		0 0 / var(--color-paper-dot-spacing) var(--color-paper-dot-spacing),
+		var(--color-paper);
+	box-shadow: var(--shadow-page);
+	text-align: left;
+}
+
+.notebook-page:first-child {
+	border-radius: var(--radius-page-left) 0 0 var(--radius-page-left);
+}
+
+.notebook-page:last-child {
+	border-radius: 0 var(--radius-page-right) var(--radius-page-right) 0;
+}
+
+.notebook-page h2 {
+	margin: 0;
+	padding-left: 0.6rem;
+	color: var(--color-forest);
+	font-family: Georgia, serif;
+	font-size: 1.6rem;
+}
+
+.month-calendar {
+	min-width: 0;
+	padding-left: 0.5rem;
+}
+
+.month-calendar .btn {
+	min-height: 2rem;
+	height: 2rem;
+	margin-bottom: 0.5rem;
+	border: 0;
+	background: var(--color-control);
+	color: var(--color-forest);
+	font-size: 0.75rem;
+}
+
+.month-calendar .react-calendar {
+	width: 100%;
+	border: 0;
+	background: transparent;
+	font-family: inherit;
+}
+
+.month-calendar .react-calendar__month-view__weekdays {
+	font-size: 0.65rem;
+}
+
+.month-calendar .react-calendar__tile {
+	padding: 0.45em 0.15em;
+	border-radius: var(--radius-calendar-tile);
+}
+
+.month-calendar .react-calendar__tile:enabled:hover,
+.month-calendar .react-calendar__tile:enabled:focus {
+	background: var(--color-control-hover);
+}
+
+.month-input {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.75rem;
+	margin-top: auto;
+	padding: 0.75rem 0.5rem 0 0.5rem;
+	color: var(--color-forest-muted);
+	font-weight: 700;
+}
+
+.month-input .input {
+	width: min(8rem, 45%);
+	border-color: var(--color-input-border);
+	background: var(--color-paper-input);
+}
+
+.page-arrow {
+	display: grid;
+	place-items: center;
+	width: 2.75rem;
+	height: 2.75rem;
+	border: 0;
+	border-radius: 50%;
+	background: var(--color-control-pale);
+	color: var(--color-forest);
+	box-shadow: var(--shadow-control);
+	cursor: pointer;
+}
+
+.page-arrow span {
+	margin-top: -0.15em;
+	font-size: 2.25rem;
+	line-height: 1;
+}
+
+.page-arrow:disabled {
+	opacity: 0.4;
+	cursor: not-allowed;
+}
+
+.notebook-summary {
+	grid-column: 2;
+	width: 100%;
+	padding: 0.75rem 1rem 0;
+	color: var(--color-forest-soft);
+}
+
+.notebook-summary section {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	gap: 0.5rem 1.5rem;
+	font-size: 0.875rem;
 }
 
 input[type="number"] {
@@ -105,4 +277,43 @@ input[type="number"] {
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
 	-webkit-appearance: none;
+}
+
+@media (max-width: 700px) {
+	#root {
+		padding: 1rem 0.75rem;
+	}
+
+	.layout {
+		min-height: calc(100vh - 2rem);
+	}
+
+	.desk {
+		grid-template-columns: auto minmax(0, 1fr) auto;
+		gap: 0.35rem;
+		padding: 0.75rem 0.4rem;
+		border-radius: 1rem;
+	}
+
+	.notebook-pages {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.notebook-page {
+		padding: 1rem;
+	}
+
+	.page-arrow {
+		width: 2rem;
+		height: 2rem;
+	}
+
+	.page-arrow span {
+		font-size: 1.75rem;
+	}
+
+	.notebook-summary {
+		grid-column: 1 / -1;
+		padding: 0.5rem 0.25rem 0;
+	}
 }
