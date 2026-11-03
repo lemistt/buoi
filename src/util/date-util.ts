@@ -59,23 +59,6 @@ export function countDaysLeft(startDate: Date, excludedDates: Set<string>) {
 	return count;
 }
 
-/*
-export function countDaysLeft(start: Date, daysLeft: number) {
-    let count = 0;
-    const current = new Date(start);
-
-    while (count < daysLeft) {
-        current.setDate(current.getDate() + 1);
-        const day = current.getDay();
-        if (day !== 0 && day !== 6) {
-            count++;
-        }
-    }
-
-    return count;
-}
-*/
-
 function isWeekend(date: Date) {
 	const day = date.getDay();
 	return day === 0 || day === 6; // Sunday (0) or Saturday (6)
